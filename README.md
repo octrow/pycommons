@@ -18,105 +18,31 @@ and falls back to a plain `StreamHandler`, so a stdlib-only consumer can install
 | `pycommons.json_store` | `load_or_default` / `save_atomic` / `merge_keep_nonempty` |
 | `pycommons.text` | `safe_filename` / `slugify` |
 
-## Invariants (the reason this library exists)
+## Behaviour
 
-**logsetup**
+The normative behaviour of every module lives in `openspec/specs/` — 22
+requirements over 68 scenarios, each one carrying the reason it exists and, where
+there was one, the bug in the original copy that put it there. Those specs are
+the baseline; changes are proposed against them.
 
-* **One logger tree per package, `propagate = False`.** Handlers go on
-  `logging.getLogger("tlf")`; module code only ever does
-  `logging.getLogger("tlf.<area>")` and logs. Nothing is configured at import
-  time, so importing a library module never creates a `logs/` directory — that
-  is what keeps consumers' test suites clean.
-  `logger_name=""` targets the **root** logger instead (the jobs shape) and is
-  the one case where `propagate` is left alone, because the root has no parent.
-* **Two levels, two audiences.** The file gets DEBUG — the complete record of the
-  run, which is the thing you actually need after an unattended scrape. The
-  console gets INFO, so a long step never *looks* stuck. `console_level=None`
-  drops the console entirely (dialogue-lens logs to files only).
-* **One file per run, timestamped.** Runs are the unit of debugging; a single
-  appended log makes "what did last night's run do" an exercise in grep. The
-  stamp has **1-second resolution** — two runs started inside the same second
-  share a file (true of every source copy). `persistent_file=` adds a
-  never-rotated append-only companion when you want history too.
-* **`rich` is optional at runtime, not just at install time.** The import lives
-  inside `_console_handler`; an `ImportError` degrades to `StreamHandler` with
-  the same compact `[HH:MM:SS] message` layout. A logging setup must not be the
-  thing that breaks a deployment.
-* **Idempotent by default.** A repeat call returns the same path and touches
-  nothing (dialogue-lens needed this: a dev reloader re-imports the CLI, and the
-  original stacked a second set of handlers → every line logged twice).
-  `reconfigure=True` rewires deliberately, and *replaces* our handlers rather
-  than stacking them.
-* **`attach=` exists because some libraries opt out of propagation.** jobspy
-  sets `propagate = False` on `JobSpy:<Site>` loggers, so the only way to capture
-  them is to hand them the file handler itself. Patterns (`"JobSpy:*"`) match
-  loggers that **already exist**, so call `setup_logging` after the library has
-  created them (or pass exact names).
+| capability | spec |
+|---|---|
+| `pycommons.logsetup` | [openspec/specs/logsetup/spec.md](openspec/specs/logsetup/spec.md) |
+| `pycommons.env` | [openspec/specs/env/spec.md](openspec/specs/env/spec.md) |
+| `pycommons.db` | [openspec/specs/db/spec.md](openspec/specs/db/spec.md) |
+| `pycommons.json_store` | [openspec/specs/json-store/spec.md](openspec/specs/json-store/spec.md) |
+| `pycommons.text` | [openspec/specs/text/spec.md](openspec/specs/text/spec.md) |
 
-**env**
+```bash
+openspec list --specs                  # requirement counts
+openspec show logsetup                 # read one
+openspec validate --specs --strict     # check them
+```
 
-* A **missing file is not an error** — you get `defaults` back. That is what
-  makes the config path optional for every caller, and it is why this is 12 lines
-  instead of python-dotenv.
-* Values are **returned, never exported**. `os.environ` is process-global state;
-  polluting it from a parser surprises everyone. `override_os_environ=True` opts
-  in.
-* `KEY=VALUE`, split on the **first** `=` only (so URLs with query strings
-  survive). Blank lines, `#` comments and lines without `=` are skipped. No
-  quote-stripping, no interpolation, no `export ` prefix — the format in play
-  never had them, and inventing support invites files that only work here.
-
-**db**
-
-* **`schema_sql` runs on every open**, so it must be idempotent
-  (`CREATE TABLE IF NOT EXISTS`). That single property makes "open the db" and
-  "migrate the db" the same call, which is why no consumer has ever needed a
-  migration tool. Additive column migrations stay with the consumer (tlf does its
-  own `ALTER TABLE … ADD COLUMN` inside a `try`), because they are schema
-  history, not a generic concern.
-* **`row_factory = sqlite3.Row` always.** Positional row access is how a schema
-  change turns into a silent wrong-column bug.
-* `sqlite_session` **commits only on a clean exit**; an exception propagates with
-  the transaction open, and closing discards it — a half-finished stage never
-  lands partial rows. There is deliberately no rollback-and-continue: the caller
-  should see the exception.
-* Parent directories are created. `open_sqlite_db` leaves closing to the caller;
-  `sqlite_session` handles it.
-
-**json_store**
-
-* **`save_atomic` writes to a temp file in the destination directory, fsyncs, then
-  `os.replace`s.** Same-directory means same filesystem means the rename is
-  atomic: a reader sees the old file or the new one, never a truncated one. The
-  original `json.dump` straight onto the target could destroy an hour of browser
-  driving on a crash. On a serialisation failure the temp file is removed and the
-  original is untouched — no `.name.tmp` litter.
-* **`ensure_ascii=False` always.** The data is Russian/Kazakh; escaped JSON is
-  unreviewable in a diff.
-* **A corrupt file raises.** dental-parser's `except: pass` read corruption as
-  "no data", and the next save then replaced the file with a smaller one. Losing
-  data quietly is worse than failing loudly.
-* **`merge_keep_nonempty` never overwrites a non-empty value.** A re-scrape must
-  not wipe a field a human filled in by hand, nor one this run merely failed to
-  extract. `always=` names the fields that *are* facts about the source
-  (`rating`, `review_count`) and get refreshed whenever the new value is truthy.
-  Returns a new dict — the original merged in place.
-
-**text**
-
-* **Two functions, because the three copies in the wild are two contracts.**
-  `safe_filename` keeps case and keeps Cyrillic (dental-parser looks a directory
-  up again by re-slugifying the clinic name, so mangling non-ASCII breaks the
-  lookup, not just the looks). `slugify` deliberately destroys non-ASCII to
-  produce a `^[a-z0-9][a-z0-9_-]*$` identifier you can type on a command line.
-  A single function with an `ascii_only` flag would hide which contract a call
-  site depends on.
-* Both are **idempotent** — slugging a slug is a no-op — and both trim trailing
-  separators *after* truncating, so a truncated key never ends in `_`.
-* `slugify` returns `fallback` (`"x"`) rather than `""`: the result is used as a
-  filename stem and a dict key, and neither may be empty. `safe_filename`
-  returns `""` for unusable input, as its original did — callers there already
-  check.
+The short version, if you only read one thing: nothing is configured at import
+time, a corrupt file raises instead of reading as empty, a save is atomic, a
+re-scrape never overwrites a non-empty field, and `rich` is optional at runtime
+rather than only at install time.
 
 ## Usage
 
@@ -210,6 +136,6 @@ text:     safe_filename(name, *, max_len=50, sep="_") -> str     # keeps Unicode
 cd /home/octrow/dev/pylibs && uv run --package pycommons --extra dev pytest pycommons/tests -q
 ```
 
-93 tests, no network, no real `logs/` directory (everything goes to `tmp_path`).
+94 tests, no network, no real `logs/` directory (everything goes to `tmp_path`).
 The rich-absent branch is covered by monkeypatching `builtins.__import__`, so the
 stdlib fallback is tested with rich installed.
