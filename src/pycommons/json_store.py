@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -36,6 +37,11 @@ def load_or_default(path: str | Path, default: Any = None) -> Any:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+# Read once at import (os.umask can only be read by setting it).
+_UMASK = os.umask(0)
+os.umask(_UMASK)
+
+
 def save_atomic(path: str | Path, data: Any, *, indent: int | None = 2) -> Path:
     """Write ``data`` as JSON so readers see either the old file or the new one.
 
@@ -49,9 +55,13 @@ def save_atomic(path: str | Path, data: Any, *, indent: int | None = 2) -> Path:
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_name(f".{p.name}.tmp")
+    # A unique temp name per call: a fixed one let two concurrent writers clobber
+    # each other's temp file and rename a half-written one into place.
+    fd, tmp_name = tempfile.mkstemp(dir=p.parent, prefix=f".{p.name}.", suffix=".tmp")
+    tmp = Path(tmp_name)
     try:
-        with tmp.open("w", encoding="utf-8") as f:
+        os.chmod(fd, 0o666 & ~_UMASK)  # mkstemp is 0600; keep a normal file's mode
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=indent)
             f.flush()
             os.fsync(f.fileno())

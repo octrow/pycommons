@@ -123,3 +123,14 @@ def test_inputs_are_not_mutated():
     old, new = {"a": ""}, {"a": "x"}
     merge_keep_nonempty(old, new)
     assert old == {"a": ""} and new == {"a": "x"}
+
+
+def test_save_atomic_survives_concurrent_writers(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    path = tmp_path / "out.json"
+    payloads = [{"n": i, "pad": "x" * 20_000} for i in range(16)]
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(lambda d: save_atomic(path, d), payloads))
+    assert json.loads(path.read_text(encoding="utf-8")) in payloads
+    assert not list(tmp_path.glob(".out.json.*"))  # no temp files left behind
