@@ -60,6 +60,15 @@ setup_logging("dialogue_lens", "logs", console_level=None,
 setup_logging("", "logs", rich=False, run_prefix="run_", attach=["JobSpy:*"])
 ```
 
+Production defaults (all stdlib, each with an opt-out kwarg): the persistent file
+is a `RotatingFileHandler` (`persistent_max_bytes=10 MiB`, `persistent_backups=5`);
+uncaught exceptions in the main thread (CRITICAL) and worker threads (ERROR) are
+logged with their traceback and then handed to the previous hook
+(`catch_uncaught=True`); `warnings.warn` lands in the file
+(`capture_warnings=True`); and values of `*TOKEN*` / `*SECRET*` / `*KEY*` /
+`*PASSWORD*` / `*HASH*` env vars (8+ chars) and `Bearer <token>` are masked as
+`***` in every handler (`redact=True`; the env is read once per setup call).
+
 ```python
 from pycommons import load_env, open_sqlite_db, sqlite_session
 

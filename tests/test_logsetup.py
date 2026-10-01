@@ -215,3 +215,148 @@ def test_attach_accepts_logger_objects(tmp_path):
 
 def test_returns_path_object(tmp_path):
     assert isinstance(setup_logging("pkgtest.q", tmp_path), Path)
+
+
+def test_reconfigure_closes_the_previous_file_handlers(tmp_path):
+    setup_logging("pkgtest.close", tmp_path)
+    old = file_handlers("pkgtest.close")
+    setup_logging("pkgtest.close", tmp_path, reconfigure=True)
+    assert all(h.stream is None for h in old)
+
+
+# --- production hardening: attach cleanup, rotation, hooks, warnings, redaction ---
+
+
+def test_reconfigure_detaches_the_old_file_handler_from_attached_loggers(tmp_path):
+    lib = logging.getLogger("JobSpy:Reconf")
+    lib.handlers.clear()
+    setup_logging("pkgtest.s", tmp_path, attach=[lib])
+    old = list(lib.handlers)
+    setup_logging("pkgtest.s", tmp_path / "second", attach=[lib], reconfigure=True)
+
+    assert len(lib.handlers) == 1                    # no accumulation
+    assert not any(h in lib.handlers for h in old)   # the closed one is gone
+
+
+def test_persistent_file_rotates_at_the_size_cap(tmp_path):
+    from logging.handlers import RotatingFileHandler
+
+    setup_logging("pkgtest.t", tmp_path, persistent_file="hist.log",
+                  persistent_max_bytes=200, persistent_backups=2)
+    rot = [h for h in handlers("pkgtest.t") if isinstance(h, RotatingFileHandler)]
+    assert len(rot) == 1 and rot[0].maxBytes == 200 and rot[0].backupCount == 2
+    for i in range(30):
+        logging.getLogger("pkgtest.t").info("line %d padded out to fill the file", i)
+    assert (tmp_path / "hist.log.1").exists()
+    assert not (tmp_path / "hist.log.3").exists()
+
+
+def test_persistent_file_has_a_default_size_cap(tmp_path):
+    from logging.handlers import RotatingFileHandler
+
+    setup_logging("pkgtest.u", tmp_path, persistent_file=True)
+    rot = [h for h in handlers("pkgtest.u") if isinstance(h, RotatingFileHandler)]
+    assert rot[0].maxBytes == logsetup.PERSISTENT_MAX_BYTES
+    assert rot[0].backupCount == logsetup.PERSISTENT_BACKUPS
+
+
+@pytest.fixture(autouse=True)
+def saved_hooks():
+    """setup_logging installs process-wide hooks; give them back after each test."""
+    import sys
+    import threading
+
+    saved = sys.excepthook, threading.excepthook
+    yield
+    sys.excepthook, threading.excepthook = saved
+    logging.captureWarnings(False)
+    logging.getLogger("py.warnings").handlers.clear()
+
+
+def test_uncaught_exception_is_logged_then_chained(tmp_path, saved_hooks, monkeypatch):
+    import sys
+
+    seen = []
+    monkeypatch.setattr(sys, "excepthook", lambda *a: seen.append(a))
+    path = setup_logging("pkgtest.v", tmp_path)
+    setup_logging("pkgtest.v", tmp_path, reconfigure=True)   # repeat: no double wrap
+    try:
+        raise RuntimeError("boom-uncaught")
+    except RuntimeError:
+        sys.excepthook(*sys.exc_info())
+    for h in handlers("pkgtest.v"):
+        h.flush()
+
+    text = path.read_text(encoding="utf-8")
+    assert text.count("boom-uncaught") >= 1 and "CRITICAL" in text
+    assert "Traceback" in text
+    assert len(seen) == 1                            # previous hook ran exactly once
+
+
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
+def test_uncaught_thread_exception_is_logged(tmp_path, saved_hooks):
+    import threading
+
+    path = setup_logging("pkgtest.w", tmp_path)
+    t = threading.Thread(target=lambda: 1 / 0, name="worker-x")
+    t.start()
+    t.join()
+    for h in handlers("pkgtest.w"):
+        h.flush()
+
+    text = path.read_text(encoding="utf-8")
+    assert "worker-x" in text and "ZeroDivisionError" in text
+
+
+def test_catch_uncaught_false_leaves_hooks_alone(tmp_path, saved_hooks):
+    import sys
+    import threading
+
+    before = sys.excepthook, threading.excepthook
+    setup_logging("pkgtest.x", tmp_path, catch_uncaught=False)
+    assert (sys.excepthook, threading.excepthook) == before
+
+
+def test_warnings_land_in_the_file(tmp_path):
+    import warnings
+
+    # pytest restores warnings.showwarning between tests, which leaves logging's
+    # "already capturing" flag stale — reset it so this test is order-independent.
+    logging.captureWarnings(False)
+    path = setup_logging("pkgtest.y", tmp_path)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("always")
+            warnings.warn("deprecated-thing", UserWarning)
+    finally:
+        logging.captureWarnings(False)
+        logging.getLogger("py.warnings").handlers.clear()
+    for h in handlers("pkgtest.y"):
+        h.flush()
+    assert "deprecated-thing" in path.read_text(encoding="utf-8")
+
+
+def test_secrets_are_redacted_in_the_file(tmp_path, monkeypatch):
+    monkeypatch.setenv("MY_API_TOKEN", "s3cr3t-value-123")
+    monkeypatch.setenv("SHORT_KEY", "abc")           # too short to mask safely
+    path = setup_logging("pkgtest.z", tmp_path)
+    log = logging.getLogger("pkgtest.z")
+    log.info("token=%s", "s3cr3t-value-123")
+    log.info("header Authorization: Bearer eyJhbGciOi.payload.sig")
+    log.info("short abc stays")
+    for h in handlers("pkgtest.z"):
+        h.flush()
+
+    text = path.read_text(encoding="utf-8")
+    assert "s3cr3t-value-123" not in text and "token=***" in text
+    assert "eyJhbGciOi" not in text and "Bearer ***" in text
+    assert "short abc stays" in text
+
+
+def test_redact_false_keeps_values(tmp_path, monkeypatch):
+    monkeypatch.setenv("MY_API_TOKEN", "s3cr3t-value-123")
+    path = setup_logging("pkgtest.za", tmp_path, redact=False)
+    logging.getLogger("pkgtest.za").info("token=%s", "s3cr3t-value-123")
+    for h in handlers("pkgtest.za"):
+        h.flush()
+    assert "s3cr3t-value-123" in path.read_text(encoding="utf-8")

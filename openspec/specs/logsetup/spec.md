@@ -58,7 +58,7 @@ Each configured run SHALL write to its own timestamped file, because a run is th
 unit of debugging and a single appended log makes "what did last night's run do"
 an exercise in grep. Timestamp resolution is one second; two runs started inside
 the same second SHALL share a file, which is a deliberate and accepted
-limitation. `persistent_file` SHALL additionally append to a never-rotated file,
+limitation. `persistent_file` SHALL additionally append to a size-rotated file (`persistent_max_bytes`, `persistent_backups`),
 named `<logger_name>.log` when `True` or by the given string, whose lines carry
 the full date because that file spans many days.
 
