@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from pycommons import logsetup
-from pycommons.logsetup import run_log_path, setup_logging
+from tinycommons import logsetup
+from tinycommons.logsetup import run_log_path, setup_logging
 
 
 @pytest.fixture(autouse=True)

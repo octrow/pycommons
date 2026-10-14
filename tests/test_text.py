@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from pycommons import safe_filename, slugify
+from tinycommons import safe_filename, slugify
 
 
 # --- safe_filename (dental-parser shape: keeps case and Unicode) ------------

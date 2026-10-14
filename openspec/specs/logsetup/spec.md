@@ -13,7 +13,7 @@ created until then, so importing a consumer's library module never leaves a
 `logs/` directory behind in its test suite.
 
 #### Scenario: Importing a module does not create a log directory
-- **WHEN** a consumer imports `pycommons.logsetup` without calling `setup_logging`
+- **WHEN** a consumer imports `tinycommons.logsetup` without calling `setup_logging`
 - **THEN** no `logs/` directory is created and no handler is added to any logger
 
 #### Scenario: Setup creates the directory and a run file

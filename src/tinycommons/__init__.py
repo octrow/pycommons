@@ -1,16 +1,16 @@
-"""pycommons — the small utilities that got copied into every repo.
+"""tinycommons — the small utilities that got copied into every repo.
 
 Five independent modules, stdlib only (`rich` is an optional extra used by
 `logsetup` and nothing else):
 
-* :mod:`pycommons.logsetup` — `setup_logging`: per-run log file + optional
+* :mod:`tinycommons.logsetup` — `setup_logging`: per-run log file + optional
   rich/plain console, on a per-package logger tree.
-* :mod:`pycommons.env` — `load_env`: dependency-free ``KEY=VALUE`` .env reader.
-* :mod:`pycommons.db` — `open_sqlite_db` / `sqlite_session`: the sqlite open
+* :mod:`tinycommons.env` — `load_env`: dependency-free ``KEY=VALUE`` .env reader.
+* :mod:`tinycommons.db` — `open_sqlite_db` / `sqlite_session`: the sqlite open
   idiom (Row factory, idempotent schema, mkdir).
-* :mod:`pycommons.json_store` — `load_or_default` / `save_atomic` /
+* :mod:`tinycommons.json_store` — `load_or_default` / `save_atomic` /
   `merge_keep_nonempty`: JSON file used as a database, safely.
-* :mod:`pycommons.text` — `safe_filename` / `slugify`.
+* :mod:`tinycommons.text` — `safe_filename` / `slugify`.
 """
 
 from .db import open_sqlite_db, sqlite_session

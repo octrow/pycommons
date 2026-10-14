@@ -15,7 +15,7 @@ directory that is later looked up again by re-deriving the same name, the other
 produces something a person types on a command line.
 
 #### Scenario: Both functions are available independently
-- **WHEN** the `pycommons` package is imported
+- **WHEN** the `tinycommons` package is imported
 - **THEN** `safe_filename` and `slugify` are both exported
 
 ### Requirement: safe_filename preserves the input alphabet and case

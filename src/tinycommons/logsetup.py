@@ -191,7 +191,7 @@ def run_log_path(logger_name: str) -> Path | None:
 def _install_excepthooks(logger_name: str) -> None:
     """Log uncaught exceptions via ``logger_name``, then chain; wraps only once."""
     _hook_logger[:] = [logger_name]
-    if not getattr(sys.excepthook, "_pycommons", False):
+    if not getattr(sys.excepthook, "_tinycommons", False):
         prev_sys = sys.excepthook
 
         def sys_hook(exc_type, exc, tb):
@@ -200,9 +200,9 @@ def _install_excepthooks(logger_name: str) -> None:
                     "uncaught exception", exc_info=(exc_type, exc, tb))
             prev_sys(exc_type, exc, tb)
 
-        sys_hook._pycommons = True  # type: ignore[attr-defined]
+        sys_hook._tinycommons = True  # type: ignore[attr-defined]
         sys.excepthook = sys_hook
-    if not getattr(threading.excepthook, "_pycommons", False):
+    if not getattr(threading.excepthook, "_tinycommons", False):
         prev_thread = threading.excepthook
 
         def thread_hook(args):
@@ -213,7 +213,7 @@ def _install_excepthooks(logger_name: str) -> None:
                     exc_info=(args.exc_type, args.exc_value, args.exc_traceback))
             prev_thread(args)
 
-        thread_hook._pycommons = True  # type: ignore[attr-defined]
+        thread_hook._tinycommons = True  # type: ignore[attr-defined]
         threading.excepthook = thread_hook
 
 

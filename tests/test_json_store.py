@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from pycommons import load_or_default, merge_keep_nonempty, save_atomic
+from tinycommons import load_or_default, merge_keep_nonempty, save_atomic
 
 
 # --- load_or_default --------------------------------------------------------

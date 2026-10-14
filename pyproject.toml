@@ -1,10 +1,16 @@
 [project]
-name = "pycommons"
-version = "0.1.0"
+name = "tinycommons"
+version = "0.2.0"
 license = "MIT"
+readme = "README.md"
+authors = [{ name = "Daniil Petrov" }]
 description = "The small utilities duplicated across ~7 repos: setup_logging, load_env, sqlite open, atomic JSON store, slugify"
 requires-python = ">=3.12"
 dependencies = []  # stdlib only, on purpose
+
+[project.urls]
+Homepage = "https://github.com/octrow/pycommons"
+Issues = "https://github.com/octrow/pycommons/issues"
 
 [project.optional-dependencies]
 # Only `logsetup`'s console sink uses rich, and only if importable.
@@ -16,7 +22,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pycommons"]
+packages = ["src/tinycommons"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

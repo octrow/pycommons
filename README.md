@@ -1,4 +1,8 @@
-# pycommons
+# tinycommons
+
+```bash
+uv add tinycommons    # or tinycommons[rich]
+```
 
 The small utilities that got copy-pasted into every repo — `setup_logging`,
 `load_env`, the ten-line sqlite open, JSON-file-as-database, and slugs.
@@ -8,15 +12,15 @@ dialogue-lens, finance-insights, jobs, dental-parser, chat-watch).
 Python ≥3.12. **Stdlib only.** `rich` is an optional extra used by `logsetup`'s
 console sink and nothing else — and even then it is imported inside the function
 and falls back to a plain `StreamHandler`, so a stdlib-only consumer can install
-`pycommons` bare.
+`tinycommons` bare.
 
 | module | what it is |
 |---|---|
-| `pycommons.logsetup` | `setup_logging` — per-run log file + optional console, on a per-package logger tree |
-| `pycommons.env` | `load_env` — dependency-free `KEY=VALUE` .env reader |
-| `pycommons.db` | `open_sqlite_db` / `sqlite_session` — Row factory, idempotent schema, mkdir |
-| `pycommons.json_store` | `load_or_default` / `save_atomic` / `merge_keep_nonempty` |
-| `pycommons.text` | `safe_filename` / `slugify` |
+| `tinycommons.logsetup` | `setup_logging` — per-run log file + optional console, on a per-package logger tree |
+| `tinycommons.env` | `load_env` — dependency-free `KEY=VALUE` .env reader |
+| `tinycommons.db` | `open_sqlite_db` / `sqlite_session` — Row factory, idempotent schema, mkdir |
+| `tinycommons.json_store` | `load_or_default` / `save_atomic` / `merge_keep_nonempty` |
+| `tinycommons.text` | `safe_filename` / `slugify` |
 
 ## Behaviour
 
@@ -27,11 +31,11 @@ the baseline; changes are proposed against them.
 
 | capability | spec |
 |---|---|
-| `pycommons.logsetup` | [openspec/specs/logsetup/spec.md](openspec/specs/logsetup/spec.md) |
-| `pycommons.env` | [openspec/specs/env/spec.md](openspec/specs/env/spec.md) |
-| `pycommons.db` | [openspec/specs/db/spec.md](openspec/specs/db/spec.md) |
-| `pycommons.json_store` | [openspec/specs/json-store/spec.md](openspec/specs/json-store/spec.md) |
-| `pycommons.text` | [openspec/specs/text/spec.md](openspec/specs/text/spec.md) |
+| `tinycommons.logsetup` | [openspec/specs/logsetup/spec.md](openspec/specs/logsetup/spec.md) |
+| `tinycommons.env` | [openspec/specs/env/spec.md](openspec/specs/env/spec.md) |
+| `tinycommons.db` | [openspec/specs/db/spec.md](openspec/specs/db/spec.md) |
+| `tinycommons.json_store` | [openspec/specs/json-store/spec.md](openspec/specs/json-store/spec.md) |
+| `tinycommons.text` | [openspec/specs/text/spec.md](openspec/specs/text/spec.md) |
 
 ```bash
 openspec list --specs                  # requirement counts
@@ -47,7 +51,7 @@ rather than only at install time.
 ## Usage
 
 ```python
-from pycommons import setup_logging
+from tinycommons import setup_logging
 
 # tiktok-lazy-follower / get_cool_event, verbatim behaviour:
 log_path = setup_logging("tlf", cfg.logs_dir)                  # rich console + DEBUG file
@@ -70,7 +74,7 @@ logged with their traceback and then handed to the previous hook
 `***` in every handler (`redact=True`; the env is read once per setup call).
 
 ```python
-from pycommons import load_env, open_sqlite_db, sqlite_session
+from tinycommons import load_env, open_sqlite_db, sqlite_session
 
 env = load_env(".env", {"WORK_TZ": "Asia/Almaty"})
 
@@ -82,7 +86,7 @@ conn = open_sqlite_db("cache.db", SCHEMA)                      # caller closes
 ```
 
 ```python
-from pycommons import load_or_default, merge_keep_nonempty, safe_filename, save_atomic
+from tinycommons import load_or_default, merge_keep_nonempty, safe_filename, save_atomic
 
 clinics = {c["link_2gis"]: c for c in load_or_default("data/clinics.json", [])}
 fresh = merge_keep_nonempty(clinics.get(link, {}), scraped,
@@ -142,7 +146,7 @@ text:     safe_filename(name, *, max_len=50, sep="_") -> str     # keeps Unicode
 ## Tests
 
 ```bash
-cd /home/octrow/dev/pylibs && uv run --package pycommons --extra dev pytest pycommons/tests -q
+cd pylibs && uv run --package tinycommons --extra dev pytest tinycommons/tests -q
 ```
 
 94 tests, no network, no real `logs/` directory (everything goes to `tmp_path`).

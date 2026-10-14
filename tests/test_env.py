@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from pycommons import load_env
+from tinycommons import load_env
 
 DEFAULTS = {"WORK_TZ": "Asia/Almaty", "WORK_START": "10:30"}
 

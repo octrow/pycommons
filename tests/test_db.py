@@ -6,7 +6,7 @@ import sqlite3
 
 import pytest
 
-from pycommons import open_sqlite_db, sqlite_session
+from tinycommons import open_sqlite_db, sqlite_session
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS videos (
