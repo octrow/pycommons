@@ -1,11 +1,17 @@
 [project]
 name = "tinycommons"
-version = "0.2.1"
+version = "0.2.2"
 license = "MIT"
 readme = "README.md"
 authors = [{ name = "Daniil Petrov" }]
 description = "The small utilities duplicated across ~7 repos: setup_logging, load_env, sqlite open, atomic JSON store, slugify"
 requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
 dependencies = []  # stdlib only, on purpose
 
 [project.urls]
