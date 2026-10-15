@@ -1,4 +1,6 @@
 <picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/hero-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/hero-mobile-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/hero-dark.svg">
   <img src="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/hero-light.svg" width="100%" alt="tinycommons: the helpers every repo ends up copying, extracted once. Five stdlib-only modules: logsetup, env, db, json_store, text. Beside the title, a real Python session: safe_filename keeps Cyrillic, slugify gives an ASCII slug, merge_keep_nonempty keeps a filled phone and refreshes the rating, and load_or_default raises on a corrupt file instead of returning the default.">
 </picture>
@@ -72,6 +74,8 @@ The JSON store is where the originals lost data. dental-parser wrote the file wi
 one. `save_atomic` now writes like this:
 
 <picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/save-atomic-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/save-atomic-mobile-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/save-atomic-dark.svg">
   <img src="https://raw.githubusercontent.com/octrow/pycommons/main/assets/readme/save-atomic-light.svg" width="100%" alt="save_atomic: mkstemp creates a unique temp file in the target directory, json.dump writes it with ensure_ascii=False, fsync flushes it to disk, os.replace renames it over the target. If anything raises before the rename, the temp file is deleted, the original file is untouched and the error is re-raised.">
 </picture>

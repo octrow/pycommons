@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="795" viewBox="0 0 600 795" role="img" aria-labelledby="title desc">
+<title id="title">tinycommons: the helpers every repo ends up copying, extracted once</title>
+<desc id="desc">Five stdlib-only modules: logsetup, env, db, json_store, text. Below: a real Python session showing safe_filename, slugify, merge_keep_nonempty and load_or_default.</desc>
+<rect width="600" height="795" rx="20" fill="#F4F2EC"/>
+<text x="32" y="60" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#2E6B4F" letter-spacing="1.5">STDLIB ONLY · PYTHON 3.12+</text>
+<text x="28" y="134" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="72" fill="#17191C" font-weight="800" letter-spacing="-1.5">tinycommons</text>
+<text x="32" y="186" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="30" fill="#17191C" font-weight="600">The helpers every repo ends up</text>
+<text x="32" y="224" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="30" fill="#17191C" font-weight="600">copying, extracted once.</text>
+<text x="32" y="268" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="24" fill="#5C626A">The bugs in the copies were fixed,</text>
+<text x="32" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="24" fill="#5C626A">not carried over.</text>
+<rect x="32" y="326" width="130" height="42" rx="8" fill="#E7E3D8" stroke="#DAD5C9" stroke-width="1.5"/>
+<text x="45" y="354" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="21" fill="#17191C">logsetup</text>
+<rect x="172" y="326" width="65" height="42" rx="8" fill="#E7E3D8" stroke="#DAD5C9" stroke-width="1.5"/>
+<text x="185" y="354" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="21" fill="#17191C">env</text>
+<rect x="247" y="326" width="52" height="42" rx="8" fill="#E7E3D8" stroke="#DAD5C9" stroke-width="1.5"/>
+<text x="260" y="354" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="21" fill="#17191C">db</text>
+<rect x="309" y="326" width="156" height="42" rx="8" fill="#E7E3D8" stroke="#DAD5C9" stroke-width="1.5"/>
+<text x="322" y="354" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="21" fill="#17191C">json_store</text>
+<rect x="475" y="326" width="78" height="42" rx="8" fill="#E7E3D8" stroke="#DAD5C9" stroke-width="1.5"/>
+<text x="488" y="354" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="21" fill="#17191C">text</text>
+<rect x="16" y="400" width="568" height="379" rx="14" fill="#1B1F24"/>
+<text x="34" y="440" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">&gt;&gt;&gt; safe_filename(&quot;Клиника «Улыбка»&quot;)</text>
+<text x="34" y="471" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#8FD3AE" xml:space="preserve">&#x27;Клиника_Улыбка&#x27;</text>
+<text x="34" y="502" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">&gt;&gt;&gt; slugify(&quot;Ivan P. Sidorov&quot;)</text>
+<text x="34" y="533" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#8FD3AE" xml:space="preserve">&#x27;ivan-p-sidorov&#x27;</text>
+<text x="34" y="564" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">&gt;&gt;&gt; merge_keep_nonempty(</text>
+<text x="34" y="595" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">...     {&quot;phone&quot;: &quot;+7 701&quot;, &quot;rating&quot;: 4.1},</text>
+<text x="34" y="626" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">...     {&quot;phone&quot;: &quot;&quot;, &quot;rating&quot;: 4.6},</text>
+<text x="34" y="657" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">...     always=(&quot;rating&quot;,))</text>
+<text x="34" y="688" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#8FD3AE" xml:space="preserve">{&#x27;phone&#x27;: &#x27;+7 701&#x27;, &#x27;rating&#x27;: 4.6}</text>
+<text x="34" y="719" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#E9E7E2" xml:space="preserve">&gt;&gt;&gt; load_or_default(&quot;corrupt.json&quot;, [])</text>
+<text x="34" y="750" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="20" fill="#EE9A62" xml:space="preserve"># raises JSONDecodeError, never []</text>
+</svg>
