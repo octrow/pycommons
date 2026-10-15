@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" role="img" aria-labelledby="title desc">
+<title id="title">How save_atomic writes a file</title>
+<desc id="desc">save_atomic creates a unique temp file in the target directory, writes the JSON, fsyncs it, then os.replace renames it over the target. Readers see the old file or the new one. If anything raises before the rename, the temp file is deleted and the original is untouched.</desc>
+<rect width="1200" height="330" rx="20" fill="#F4F2EC"/>
+<text x="48" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="24" font-weight="700" fill="#17191C">save_atomic(&quot;data/clinics.json&quot;, data)</text>
+<rect x="48" y="96" width="246" height="96" rx="12" fill="#FFFFFF" stroke="#DAD5C9" stroke-width="2"/>
+<text x="68" y="138" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="24" font-weight="700" fill="#17191C">mkstemp</text>
+<text x="68" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="20" fill="#5C626A">temp file, same dir</text>
+<path d="M300 144 H326 M316 136 L326 144 L316 152" stroke="#5C626A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="332" y="96" width="246" height="96" rx="12" fill="#FFFFFF" stroke="#DAD5C9" stroke-width="2"/>
+<text x="352" y="138" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="24" font-weight="700" fill="#17191C">json.dump</text>
+<text x="352" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="20" fill="#5C626A">ensure_ascii=False</text>
+<path d="M584 144 H610 M600 136 L610 144 L600 152" stroke="#5C626A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="616" y="96" width="246" height="96" rx="12" fill="#FFFFFF" stroke="#DAD5C9" stroke-width="2"/>
+<text x="636" y="138" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="24" font-weight="700" fill="#17191C">fsync</text>
+<text x="636" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="20" fill="#5C626A">bytes reach disk</text>
+<path d="M868 144 H894 M884 136 L894 144 L884 152" stroke="#5C626A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="900" y="96" width="246" height="96" rx="12" fill="#FFFFFF" stroke="#2E6B4F" stroke-width="2"/>
+<text x="920" y="138" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="24" font-weight="700" fill="#2E6B4F">os.replace</text>
+<text x="920" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="20" fill="#5C626A">atomic rename</text>
+<path d="M171 192 V232 H739 V192 M455 192 V232" stroke="#B0501A" stroke-width="2" fill="none" stroke-dasharray="6 6"/>
+<text x="167" y="276" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif" font-size="20" fill="#B0501A">anything raises: temp file deleted, data/clinics.json untouched, error re-raised</text>
+</svg>
