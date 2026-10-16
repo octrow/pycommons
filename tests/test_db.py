@@ -81,10 +81,9 @@ def test_session_commits_on_clean_exit(tmp_path):
 
 def test_session_discards_work_on_exception(tmp_path):
     path = tmp_path / "c.db"
-    with pytest.raises(RuntimeError):
-        with sqlite_session(path, SCHEMA) as conn:
-            conn.execute("INSERT INTO state VALUES ('k', 'v')")
-            raise RuntimeError("stage blew up")
+    with pytest.raises(RuntimeError), sqlite_session(path, SCHEMA) as conn:
+        conn.execute("INSERT INTO state VALUES ('k', 'v')")
+        raise RuntimeError("stage blew up")
 
     with sqlite_session(path, SCHEMA) as conn:
         assert conn.execute("SELECT COUNT(*) FROM state").fetchone()[0] == 0
