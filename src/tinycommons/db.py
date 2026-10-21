@@ -10,9 +10,9 @@ and the schema stays with the consumer, where it belongs.
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 __all__ = ["open_sqlite_db", "sqlite_session"]
 
