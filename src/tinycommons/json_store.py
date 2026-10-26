@@ -17,8 +17,9 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 __all__ = ["load_or_default", "merge_keep_nonempty", "save_atomic"]
 
