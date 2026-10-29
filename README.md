@@ -28,7 +28,7 @@ uv add tinycommons          # or: pip install tinycommons
 uv add "tinycommons[rich]"  # rich console in setup_logging
 ```
 
-## What it looks like
+## Usage
 
 ```python
 from tinycommons import load_env, load_or_default, merge_keep_nonempty, safe_filename, \
