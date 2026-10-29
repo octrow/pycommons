@@ -29,9 +29,9 @@ import re
 import sys
 import threading
 import time
+from collections.abc import Iterable
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Iterable
 
 __all__ = [
     "FILE_FORMAT", "PERSISTENT_BACKUPS", "PERSISTENT_MAX_BYTES", "RUN_STAMP",
