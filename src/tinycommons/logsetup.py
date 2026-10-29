@@ -130,15 +130,7 @@ def setup_logging(
 
     logger = logging.getLogger(logger_name)
     logger.setLevel(min(file_level, console_level if console_level is not None else file_level))
-    for old in logger.handlers:
-        old.close()  # reconfigure must not leak the previous run's file descriptors
-    logger.handlers.clear()
-    for target, old in _attached.pop(logger_name, ()):
-        target.removeHandler(old)  # else attached loggers write to a closed file
-    if logger_name:
-        # A package tree must not double-log through the root logger's handlers;
-        # the root logger has no parent to propagate to.
-        logger.propagate = False
+    _reset_logger(logger, logger_name)
 
     file_fmt = logging.Formatter(FILE_FORMAT, FILE_DATEFMT)
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
@@ -147,14 +139,10 @@ def setup_logging(
     logger.addHandler(file_handler)
 
     if persistent_file:
-        name = persistent_file if isinstance(persistent_file, str) else f"{logger_name or 'run'}.log"
-        persistent = RotatingFileHandler(
-            directory / name, maxBytes=persistent_max_bytes,
-            backupCount=persistent_backups, encoding="utf-8",
-        )
-        persistent.setLevel(file_level)
-        persistent.setFormatter(logging.Formatter(FILE_FORMAT, PERSISTENT_DATEFMT))
-        logger.addHandler(persistent)
+        logger.addHandler(_persistent_handler(
+            directory, persistent_file, logger_name,
+            level=file_level, max_bytes=persistent_max_bytes, backups=persistent_backups,
+        ))
 
     if console_level is not None:
         handler = _console_handler(rich=rich, console=console)
@@ -166,14 +154,7 @@ def setup_logging(
         for handler in logger.handlers:
             handler.addFilter(redactor)
 
-    targets = _resolve_attach(attach)
-    if capture_warnings:
-        logging.captureWarnings(True)
-        if logger_name:  # a root setup already sees py.warnings via propagation
-            targets.append(logging.getLogger("py.warnings"))
-    for target in targets:
-        target.addHandler(file_handler)
-    _attached[logger_name] = [(target, file_handler) for target in targets]
+    _attach_file_handler(logger_name, attach, file_handler, capture_warnings=capture_warnings)
 
     if catch_uncaught:
         _install_excepthooks(logger_name)
@@ -186,6 +167,49 @@ def setup_logging(
 def run_log_path(logger_name: str) -> Path | None:
     """Per-run log path from the last `setup_logging` for this logger, if any."""
     return _runs.get(logger_name)
+
+
+def _reset_logger(logger: logging.Logger, logger_name: str) -> None:
+    """Close and drop the previous handlers, including those on attached loggers."""
+    for old in logger.handlers:
+        old.close()  # reconfigure must not leak the previous run's file descriptors
+    logger.handlers.clear()
+    for target, old in _attached.pop(logger_name, ()):
+        target.removeHandler(old)  # else attached loggers write to a closed file
+    if logger_name:
+        # A package tree must not double-log through the root logger's handlers;
+        # the root logger has no parent to propagate to.
+        logger.propagate = False
+
+
+def _persistent_handler(
+    directory: Path, persistent_file: bool | str, logger_name: str,
+    *, level: int, max_bytes: int, backups: int,
+) -> RotatingFileHandler:
+    """Build the long-lived rotating file handler with date-stamped lines."""
+    name = persistent_file if isinstance(persistent_file, str) else f"{logger_name or 'run'}.log"
+    persistent = RotatingFileHandler(
+        directory / name, maxBytes=max_bytes,
+        backupCount=backups, encoding="utf-8",
+    )
+    persistent.setLevel(level)
+    persistent.setFormatter(logging.Formatter(FILE_FORMAT, PERSISTENT_DATEFMT))
+    return persistent
+
+
+def _attach_file_handler(
+    logger_name: str, attach: Iterable[str | logging.Logger], file_handler: logging.Handler,
+    *, capture_warnings: bool,
+) -> None:
+    """Hand the file handler to the attach targets (and py.warnings) and record them."""
+    targets = _resolve_attach(attach)
+    if capture_warnings:
+        logging.captureWarnings(True)
+        if logger_name:  # a root setup already sees py.warnings via propagation
+            targets.append(logging.getLogger("py.warnings"))
+    for target in targets:
+        target.addHandler(file_handler)
+    _attached[logger_name] = [(target, file_handler) for target in targets]
 
 
 def _install_excepthooks(logger_name: str) -> None:
