@@ -8,7 +8,6 @@ import pytest
 
 from tinycommons import load_or_default, merge_keep_nonempty, save_atomic
 
-
 # --- load_or_default --------------------------------------------------------
 
 def test_missing_file_returns_default(tmp_path):
