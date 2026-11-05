@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-05
+
+### Changed
+
+- README refreshed: shorter, plain language; example section renamed to Usage.
+- `setup_logging` split up to cut its complexity (lint C901).
+- Lint cleanups: import sorting (I001), `collections.abc` imports (UP035), single `with` statement (SIM117).
+- CI: GitHub Actions dependencies bumped.
+
 ## [0.2.2] - 2026-10-15
 
 ### Changed
