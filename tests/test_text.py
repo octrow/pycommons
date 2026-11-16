@@ -6,7 +6,6 @@ import pytest
 
 from tinycommons import safe_filename, slugify
 
-
 # --- safe_filename (dental-parser shape: keeps case and Unicode) ------------
 
 @pytest.mark.parametrize("raw,expected", [
